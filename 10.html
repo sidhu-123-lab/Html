@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bunk Here</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f8f9fa;
+      text-align: center;
+    }
+    header {
+      background-color: #ff5733;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px;
+      font-size: 20px;
+    }
+    .home-btn {
+      cursor: pointer;
+      font-size: 22px;
+      color: white;
+    }
+    section {
+      margin: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: none;
+    }
+    input, select, button {
+      display: block;
+      width: 80%;
+      max-width: 400px;
+      margin: 10px auto;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #ff5733;
+      color: white;
+      border: none;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #e04e2a;
+    }
+    #map, #gprs-map {
+      width: 100%;
+      height: 400px;
+      margin-top: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    #home img, #confirm-order img {
+      width: 90%;
+      max-width: 600px;
+      height: auto;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body onload="showPage('home')">
+  <header>
+    <div class="home-btn" onclick="showPage('home')">🏠 Home</div>
+    <h1>Bunk Here</h1>
+  </header>
+
+  <section id="home">
+    <h2>Welcome to Bunk Here</h2>
+    <p>Your trusted fuel delivery partner.</p>
+    <img src="bunkhere.jpg" alt="Fuel Delivery" />
+    <button onclick="showPage('register')">Get Started</button>
+  </section>
+
+  <section id="register">
+    <h2>User Registration</h2>
+    <input type="text" id="fullname" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="tel" id="phone" placeholder="Phone Number" required>
+    <button onclick="sendOTP()">Send OTP</button>
+    <div id="otp-section" style="display:none;">
+      <input type="text" id="otp" placeholder="Enter OTP" required>
+      <button onclick="verifyOTP()">Verify OTP</button>
+    </div>
+  </section>
+
+  <section id="order">
+    <h2>Place Your Order</h2>
+    <select id="fuel-pump">
+      <option value="">Select Fuel Pump</option>
+      <option>Indian Oil</option>
+      <option>Bharat Oil</option>
+      <option>HP Pump</option>
+      <option>Essar+</option>
+    </select>
+    <select id="fuel-type">
+      <option value="">Select Fuel Type</option>
+      <option>Petrol</option>
+      <option>Diesel</option>
+    </select>
+    <input type="number" id="quantity" placeholder="Quantity (Liters)" required>
+    <input type="text" id="city" placeholder="City" required>
+    <input type="text" id="area" placeholder="Area" required>
+    <input type="text" id="landmark" placeholder="Landmark" required>
+    <input type="text" id="colony" placeholder="Colony" required>
+    <input type="text" id="street" placeholder="Street" required>
+    <input type="text" id="pincode" placeholder="Pin Code" required>
+    <input type="date" id="date" required>
+    <select id="payment-method">
+      <option value="">Select Payment Method</option>
+      <option>Credit Card</option>
+      <option>Debit Card</option>
+      <option>UPI</option>
+      <option>Cash on Delivery</option>
+    </select>
+    <button onclick="generateSummary()">Next</button>
+  </section>
+
+  <section id="order-summary">
+    <h2>Order Summary</h2>
+    <div id="summary-content">
+      <p><strong>Fuel Pump:</strong> <span id="summary-pump"></span></p>
+      <p><strong>Fuel Type:</strong> <span id="summary-type"></span></p>
+      <p><strong>Quantity:</strong> <span id="summary-quantity"></span> Liters</p>
+      <p><strong>City:</strong> <span id="summary-city"></span></p>
+      <p><strong>Area:</strong> <span id="summary-area"></span></p>
+      <p><strong>Landmark:</strong> <span id="summary-landmark"></span></p>
+      <p><strong>Colony:</strong> <span id="summary-colony"></span></p>
+      <p><strong>Street:</strong> <span id="summary-street"></span></p>
+      <p><strong>Pin Code:</strong> <span id="summary-pincode"></span></p>
+      <p><strong>Date:</strong> <span id="summary-date"></span></p>
+      <p><strong>Payment Method:</strong> <span id="summary-payment"></span></p>
+    </div>
+    <button onclick="showPage('tracking')"> Track Location</button>
+  </section>
+
+  <section id="tracking">
+    <h2>Track Your Delivery</h2>
+    <button onclick="trackLocation()">Track My Location</button>
+    <div id="gprs-map"></div>
+    <button onclick="showPage('confirm-order')">Confirm Delivery</button>
+  </section>
+
+  <section id="confirm-order">
+    <h2>Delivery Confirmation</h2>
+    <img src="delivery_boy.jpg" alt="Delivery Boy">
+    <p>Your fuel is being delivered by our trusted partner.</p>
+    <button onclick="showSuccessMessage()">Confirm Delivery</button>
+  </section>
+
+  <script>
+    function showPage(pageId) {
+      document.querySelectorAll('section').forEach(section => {
+        section.style.display = 'none';
+      });
+      document.getElementById(pageId).style.display = 'block';
+    }
+
+    function sendOTP() {
+      const name = document.getElementById("fullname").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!name || !email || !phone) {
+        alert("Please fill in all registration fields.");
+        return;
+      }
+
+      if (!/^\d{10}$/.test(phone)) {
+        alert("Please enter a valid 10-digit phone number.");
+        return;
+      }
+
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        alert("Please enter a valid email address.");
+        return;
+      }
+
+      alert("OTP Sent! Please check your phone.");
+      document.getElementById("otp-section").style.display = "block";
+    }
+
+    function verifyOTP() {
+      const otp = document.getElementById("otp").value.trim();
+      if (otp === "1234") {
+        alert("OTP Verified!");
+        showPage("order");
+      } else {
+        alert("Invalid OTP. Please try again.");
+      }
+    }
+
+    function generateSummary() {
+      const requiredFields = [
+        "fuel-pump", "fuel-type", "quantity", "city", "area", "landmark",
+        "colony", "street", "pincode", "date", "payment-method"
+      ];
+
+      for (let id of requiredFields) {
+        const value = document.getElementById(id).value.trim();
+        if (!value) {
+          alert("Please fill all order fields before proceeding.");
+          return;
+        }
+      }
+
+      // Fill in the summary
+      document.getElementById("summary-pump").textContent = document.getElementById("fuel-pump").value;
+      document.getElementById("summary-type").textContent = document.getElementById("fuel-type").value;
+      document.getElementById("summary-quantity").textContent = document.getElementById("quantity").value;
+      document.getElementById("summary-city").textContent = document.getElementById("city").value;
+      document.getElementById("summary-area").textContent = document.getElementById("area").value;
+      document.getElementById("summary-landmark").textContent = document.getElementById("landmark").value;
+      document.getElementById("summary-colony").textContent = document.getElementById("colony").value;
+      document.getElementById("summary-street").textContent = document.getElementById("street").value;
+      document.getElementById("summary-pincode").textContent = document.getElementById("pincode").value;
+      document.getElementById("summary-date").textContent = document.getElementById("date").value;
+      document.getElementById("summary-payment").textContent = document.getElementById("payment-method").value;
+
+      showPage('order-summary');
+    }
+
+    function trackLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          const map = new google.maps.Map(document.getElementById("gprs-map"), {
+            center: location,
+            zoom: 15
+          });
+          new google.maps.Marker({
+            position: location,
+            map: map,
+            title: "You are here",
+            animation: google.maps.Animation.DROP
+          });
+        }, function(error) {
+          alert("Location error: " + error.message);
+        });
+      } else {
+        alert("Geolocation not supported.");
+      }
+    }
+
+    function showSuccessMessage() {
+      alert("Fuel order placed successfully. Thank you for choosing Bunk Here!");
+      showPage('home');
+    }
+  </script>
+
+  <!-- Replace 'YOUR_API_KEY' with your actual Google Maps API Key -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+</body>
+           </html>
