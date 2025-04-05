@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bunk Here - Fuel Delivery</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f8f9fa;
+      text-align: center;
+    }
+    header {
+      background-color: #ff5733;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px;
+      font-size: 20px;
+    }
+    .home-btn {
+      cursor: pointer;
+      font-size: 22px;
+      color: white;
+    }
+    section {
+      margin: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: none;
+    }
+    input, select, button {
+      display: block;
+      width: 80%;
+      max-width: 400px;
+      margin: 10px auto;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #ff5733;
+      color: white;
+      border: none;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #e04e2a;
+    }
+    #map, #gprs-map {
+      width: 100%;
+      height: 400px;
+      margin-top: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    #home img, #confirm-order img {
+      width: 90%;
+      max-width: 600px;
+      height: auto;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body onload="showPage('home')">
+  <header>
+    <div class="home-btn" onclick="showPage('home')">🏠 Home</div>
+    <h1>Bunk Here</h1>
+  </header>
+
+  <section id="home">
+    <h2>Welcome to Bunk Here</h2>
+    <p>Your trusted fuel delivery partner.</p>
+    <img src="image.jpg" alt="Fuel Delivery" />
+    <button onclick="showPage('register')">Get Started</button>
+  </section>
+
+  <section id="register">
+    <h2>User Registration</h2>
+    <input type="text" id="fullname" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="tel" id="phone" placeholder="Phone Number" required>
+    <button onclick="sendOTP()">Send OTP</button>
+    <div id="otp-section" style="display:none;">
+      <input type="text" id="otp" placeholder="Enter OTP" required>
+      <button onclick="verifyOTP()">Verify OTP</button>
+    </div>
+  </section>
+
+  <section id="order">
+    <h2>Place Your Order</h2>
+    <select id="fuel-pump">
+      <option>Select Fuel Pump</option>
+      <option>Pump A</option>
+      <option>Pump B</option>
+    </select>
+    <select id="fuel-type">
+      <option>Select Fuel Type</option>
+      <option>Petrol</option>
+      <option>Diesel</option>
+    </select>
+    <input type="number" id="quantity" placeholder="Quantity (Liters)" required>
+    <input type="text" id="city" placeholder="City" required>
+    <input type="text" id="area" placeholder="Area" required>
+    <input type="date" id="date" required>
+    <select id="payment-method">
+      <option>Select Payment Method</option>
+      <option>Credit Card</option>
+      <option>Debit Card</option>
+      <option>UPI</option>
+      <option>Cash on Delivery</option>
+    </select>
+    <button onclick="showPage('order-summary')">Next: Summary</button>
+  </section>
+
+  <section id="order-summary">
+    <h2>Order Summary</h2>
+    <p>Your selected fuel and delivery details will appear here (dynamic summary can be added later).</p>
+    <button onclick="showPage('tracking')">Next: Track Location</button>
+  </section>
+
+  <section id="tracking">
+    <h2>Track Your Delivery</h2>
+    <button onclick="trackLocation()">Track My Location</button>
+    <div id="gprs-map"></div>
+    <button onclick="showPage('confirm-order')">Next: Confirm Delivery</button>
+  </section>
+
+  <section id="confirm-order">
+    <h2>Delivery Confirmation</h2>
+    <img src="delivery_boy.jpg" alt="Delivery Boy">
+    <p>Your fuel is being delivered by our trusted partner.</p>
+    <button onclick="showSuccessMessage()">Confirm Delivery</button>
+  </section>
+
+  <script>
+    function showPage(pageId) {
+      document.querySelectorAll('section').forEach(section => {
+        section.style.display = 'none';
+      });
+      document.getElementById(pageId).style.display = 'block';
+    }
+
+    function sendOTP() {
+      alert("OTP Sent! Please check your phone.");
+      document.getElementById("otp-section").style.display = "block";
+    }
+
+    function verifyOTP() {
+      const otp = document.getElementById("otp").value;
+      if (otp === "1234") {
+        alert("OTP Verified!");
+        showPage("order");
+      } else {
+        alert("Invalid OTP.");
+      }
+    }
+
+    function trackLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          const map = new google.maps.Map(document.getElementById("gprs-map"), {
+            center: location,
+            zoom: 15
+          });
+          new google.maps.Marker({
+            position: location,
+            map: map,
+            title: "You are here",
+            animation: google.maps.Animation.DROP
+          });
+        }, function(error) {
+          alert("Location error: " + error.message);
+        });
+      } else {
+        alert("Geolocation not supported.");
+      }
+    }
+
+    function showSuccessMessage() {
+      alert("Fuel order placed successfully. Thank you for choosing Bunk Here!");
+      showPage('home');
+    }
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+</body>
+</html>
